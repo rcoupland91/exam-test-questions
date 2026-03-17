@@ -52,7 +52,7 @@ export default function RegisterPage() {
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8 w-full">
           {/* Header */}
           <div className="text-center mb-8">
-            <img src="/terraform-badge.svg" className="w-12 h-auto mx-auto mb-4" alt="ExamForge" />
+            <img src="/logo.svg" className="w-12 h-auto mx-auto mb-4" alt="ExamForge" />
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create your account</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Start your exam prep journey</p>
           </div>

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useTheme } from '../../context/ThemeContext.jsx';
 
 export default function Navbar() {
-  const { user, isGuest, logout } = useAuth();
+  const { user, isGuest, isAdmin, logout } = useAuth();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,9 +27,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">EF</span>
-            </div>
+            <img src="/logo.svg" alt="ExamForge" className="w-8 h-8" />
             <span className="font-semibold text-gray-900 dark:text-gray-100 hidden sm:block">ExamForge</span>
           </Link>
 
@@ -37,6 +35,8 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
             <NavLink to="/exams" className={navLinkClass}>Exams</NavLink>
+            {user && <NavLink to="/profile" className={navLinkClass}>Profile</NavLink>}
+            {isAdmin && <NavLink to="/admin" className={navLinkClass}>Admin</NavLink>}
           </div>
 
           {/* Right side: user menu + dark toggle + hamburger */}
@@ -123,6 +123,24 @@ export default function Navbar() {
               >
                 Exams
               </NavLink>
+              {user && (
+                <NavLink
+                  to="/profile"
+                  className={navLinkClass}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Profile
+                </NavLink>
+              )}
+              {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className={navLinkClass}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Admin
+                </NavLink>
+              )}
 
               {/* Mobile user actions */}
               <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">

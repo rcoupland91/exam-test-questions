@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { sessionsApi } from '../api/sessions.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import QuestionCard from '../components/session/QuestionCard.jsx';
@@ -18,7 +18,9 @@ const STATE = {
 export default function SessionPage() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isGuest } = useAuth();
+  const guestLimited = location.state?.guestLimited ?? false;
 
   const [pageState, setPageState] = useState(STATE.LOADING);
   const [question, setQuestion] = useState(null);
@@ -133,6 +135,16 @@ export default function SessionPage() {
   // Question / submitted states
   return (
     <div className="max-w-3xl mx-auto space-y-6 px-4 md:px-0">
+      {/* Guest preview banner */}
+      {guestLimited && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 flex items-center justify-between gap-4">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            <span className="font-semibold">Preview mode:</span> you're seeing a sample of questions.{' '}
+            <Link to="/register" className="underline font-medium">Sign up free</Link> for the full exam.
+          </p>
+        </div>
+      )}
+
       {/* Progress */}
       {question && (
         <ProgressBar

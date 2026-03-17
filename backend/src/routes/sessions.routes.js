@@ -47,7 +47,10 @@ router.post('/', optionalAuth, (req, res, next) => {
 
     // Shuffle and optionally limit
     const shuffled = shuffle(questions.map(q => q.id));
-    const limit = question_count ? Math.min(parseInt(question_count), shuffled.length) : shuffled.length;
+    const isGuest = !req.user;
+    const guestLimit = Math.max(1, Math.ceil(shuffled.length * 0.15));
+    const maxAllowed = isGuest ? guestLimit : shuffled.length;
+    const limit = question_count ? Math.min(parseInt(question_count), maxAllowed) : maxAllowed;
     const selectedIds = shuffled.slice(0, limit);
 
     const userId = req.user ? req.user.id : null;
@@ -60,7 +63,7 @@ router.post('/', optionalAuth, (req, res, next) => {
 
     const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(result.lastInsertRowid);
 
-    res.status(201).json({ session });
+    res.status(201).json({ session, guest_limited: isGuest });
   } catch (err) {
     next(err);
   }

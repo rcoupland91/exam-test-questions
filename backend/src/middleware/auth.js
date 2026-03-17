@@ -15,6 +15,7 @@ export function requireAuth(req, res, next) {
       id: payload.id,
       username: payload.username,
       email: payload.email,
+      role: payload.role || 'user',
     };
     next();
   } catch (err) {
@@ -42,6 +43,7 @@ export function optionalAuth(req, res, next) {
       id: payload.id,
       username: payload.username,
       email: payload.email,
+      role: payload.role || 'user',
     };
     next();
   } catch (err) {

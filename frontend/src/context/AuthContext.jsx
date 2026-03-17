@@ -20,13 +20,12 @@ export function AuthProvider({ children }) {
   const [guestId, setGuestId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Rehydrate from localStorage on mount
+  // Rehydrate from storage on mount — check localStorage (remember me) then sessionStorage
   useEffect(() => {
-    // Always ensure a guestId exists in localStorage
     const id = getOrCreateGuestId();
     setGuestId(id);
 
-    const token = localStorage.getItem('exam_token');
+    const token = localStorage.getItem('exam_token') || sessionStorage.getItem('exam_token');
     const guestMode = localStorage.getItem('exam_guest_mode');
 
     if (token) {
@@ -36,18 +35,14 @@ export function AuthProvider({ children }) {
           setIsGuest(false);
         })
         .catch(() => {
-          // Token invalid/expired — clear storage
           localStorage.removeItem('exam_token');
           localStorage.removeItem('exam_user');
+          sessionStorage.removeItem('exam_token');
+          sessionStorage.removeItem('exam_user');
           setUser(null);
-          // Restore guest mode if it was set
-          if (guestMode === 'true') {
-            setIsGuest(true);
-          }
+          if (guestMode === 'true') setIsGuest(true);
         })
-        .finally(() => {
-          setLoading(false);
-        });
+        .finally(() => setLoading(false));
     } else if (guestMode === 'true') {
       setIsGuest(true);
       setLoading(false);
@@ -56,9 +51,18 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  function login(token, userData) {
-    localStorage.setItem('exam_token', token);
-    localStorage.setItem('exam_user', JSON.stringify(userData));
+  function login(token, userData, rememberMe = false) {
+    if (rememberMe) {
+      localStorage.setItem('exam_token', token);
+      localStorage.setItem('exam_user', JSON.stringify(userData));
+      sessionStorage.removeItem('exam_token');
+      sessionStorage.removeItem('exam_user');
+    } else {
+      sessionStorage.setItem('exam_token', token);
+      sessionStorage.setItem('exam_user', JSON.stringify(userData));
+      localStorage.removeItem('exam_token');
+      localStorage.removeItem('exam_user');
+    }
     localStorage.removeItem('exam_guest_mode');
     setUser(userData);
     setIsGuest(false);
@@ -68,9 +72,10 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('exam_token');
     localStorage.removeItem('exam_user');
     localStorage.removeItem('exam_guest_mode');
+    sessionStorage.removeItem('exam_token');
+    sessionStorage.removeItem('exam_user');
     setUser(null);
     setIsGuest(false);
-    // guestId is intentionally kept so session history remains accessible
   }
 
   function continueAsGuest() {
@@ -81,8 +86,10 @@ export function AuthProvider({ children }) {
     setIsGuest(true);
   }
 
+  const isAdmin = user?.role === 'admin';
+
   return (
-    <AuthContext.Provider value={{ user, loading, isGuest, guestId, login, logout, continueAsGuest }}>
+    <AuthContext.Provider value={{ user, loading, isGuest, guestId, isAdmin, login, logout, continueAsGuest }}>
       {children}
     </AuthContext.Provider>
   );

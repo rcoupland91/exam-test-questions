@@ -10,10 +10,10 @@ const client = axios.create({
   },
 });
 
-// Request interceptor — attach JWT or Guest ID from localStorage
+// Request interceptor — attach JWT (localStorage = remember me, sessionStorage = session) or Guest ID
 client.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('exam_token');
+    const token = localStorage.getItem('exam_token') || sessionStorage.getItem('exam_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
@@ -32,10 +32,10 @@ client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid — clear storage
       localStorage.removeItem('exam_token');
       localStorage.removeItem('exam_user');
-      // Redirect to login if not already there
+      sessionStorage.removeItem('exam_token');
+      sessionStorage.removeItem('exam_user');
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

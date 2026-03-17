@@ -1,5 +1,13 @@
 import { getDb } from './connection.js';
 
+function addColumnIfNotExists(db, table, column, definition) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  const exists = cols.some((c) => c.name === column);
+  if (!exists) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
 export function runMigrations() {
   const db = getDb();
 
@@ -78,4 +86,19 @@ export function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_questions_exam_id ON questions(exam_id);
     CREATE INDEX IF NOT EXISTS idx_questions_objective_id ON questions(objective_id);
   `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('registrations_enabled', '1');
+  `);
+
+  // Add new columns to users table if they don't exist yet
+  addColumnIfNotExists(db, 'users', 'role', "TEXT NOT NULL DEFAULT 'user'");
+  addColumnIfNotExists(db, 'users', 'is_active', 'INTEGER NOT NULL DEFAULT 1');
+  addColumnIfNotExists(db, 'users', 'totp_secret', 'TEXT');
+  addColumnIfNotExists(db, 'users', 'totp_enabled', 'INTEGER NOT NULL DEFAULT 0');
+  addColumnIfNotExists(db, 'users', 'avatar_color', "TEXT NOT NULL DEFAULT '#6366f1'");
 }

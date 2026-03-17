@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['terraform-badge.svg'],
+      includeAssets: ['logo.svg', 'terraform-badge.svg'],
       manifest: {
         name: 'ExamForge',
         short_name: 'ExamForge',
@@ -20,7 +20,7 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/terraform-badge.svg',
+            src: '/logo.svg',
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable'

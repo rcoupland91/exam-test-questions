@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { examsApi } from '../api/exams.js';
 import { sessionsApi } from '../api/sessions.js';
+import { useAuth } from '../context/AuthContext.jsx';
 import ObjectiveAccuracyBar from '../components/dashboard/ObjectiveAccuracyBar.jsx';
 
 export default function ExamDetailPage() {
   const { examId } = useParams();
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,7 +31,7 @@ export default function ExamDetailPage() {
         mode: 'practice',
         question_count: questionCount,
       });
-      navigate(`/sessions/${res.data.session.id}`);
+      navigate(`/sessions/${res.data.session.id}`, { state: { guestLimited: res.data.guest_limited } });
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to start session.');
       setStarting(false);
@@ -86,6 +88,22 @@ export default function ExamDetailPage() {
 
       {error && (
         <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-sm text-red-700 dark:text-red-400">{error}</div>
+      )}
+
+      {/* Guest preview notice */}
+      {isGuest && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1">
+            <p className="font-semibold text-amber-900 dark:text-amber-200 text-sm">Preview mode — 15% of questions</p>
+            <p className="text-amber-700 dark:text-amber-300 text-sm mt-0.5">
+              Guest sessions are limited to a sample of questions. <Link to="/register" className="underline font-medium">Create a free account</Link> to access the full exam.
+            </p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Link to="/register" className="btn-primary text-sm px-4 py-2">Sign up free</Link>
+            <Link to="/login" className="btn-secondary text-sm px-4 py-2">Sign in</Link>
+          </div>
+        </div>
       )}
 
       {/* Start session */}

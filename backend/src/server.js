@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes.js';
 import examRoutes from './routes/exams.routes.js';
 import sessionRoutes from './routes/sessions.routes.js';
 import progressRoutes from './routes/progress.routes.js';
+import adminRouter from './routes/admin.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/admin', adminRouter);
 
 // 404 handler
 app.use((_req, res) => {

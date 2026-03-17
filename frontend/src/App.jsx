@@ -9,6 +9,8 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import ExamsPage from './pages/ExamsPage.jsx';
 import ExamDetailPage from './pages/ExamDetailPage.jsx';
 import SessionPage from './pages/SessionPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/exams" element={<ExamsPage />} />
           <Route path="/exams/:examId" element={<ExamDetailPage />} />
           <Route path="/sessions/:sessionId" element={<SessionPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Route>
 
