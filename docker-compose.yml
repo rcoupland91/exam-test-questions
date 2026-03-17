@@ -1,0 +1,48 @@
+# ExamForge — pull-based deployment (no build required)
+# Images are pulled from GitHub Container Registry.
+# See .env.example for required variables.
+#
+# Quick start:
+#   cp .env.example .env   # then set JWT_SECRET
+#   docker compose up -d
+
+services:
+  backend:
+    image: ${EXAMFORGE_BACKEND_IMAGE:-ghcr.io/rcoupland91/examforge-backend:latest}
+    container_name: examforge-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_PATH: /data/exam.db
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+    volumes:
+      - db_data:/data
+    networks:
+      - examforge
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    image: ${EXAMFORGE_FRONTEND_IMAGE:-ghcr.io/rcoupland91/examforge-frontend:latest}
+    container_name: examforge-frontend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-5000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - examforge
+
+volumes:
+  db_data:
+    name: examforge_db_data
+
+networks:
+  examforge:
+    driver: bridge

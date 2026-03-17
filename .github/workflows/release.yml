@@ -1,0 +1,199 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  release:
+    name: Build, Push & Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # --- Backend image ---
+      - name: Extract metadata (backend)
+        id: meta_backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/examforge-backend
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          dockerfile: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta_backend.outputs.tags }}
+          labels: ${{ steps.meta_backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- Frontend image ---
+      - name: Extract metadata (frontend)
+        id: meta_frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/examforge-frontend
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          dockerfile: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta_frontend.outputs.tags }}
+          labels: ${{ steps.meta_frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- GitHub Release ---
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "${{ steps.version.outputs.VERSION }}" | head -1)
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s" | head -20)
+          else
+            COMMITS=$(git log ${PREV_TAG}..${{ steps.version.outputs.VERSION }} --pretty=format:"- %s")
+          fi
+          echo "COMMITS<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.version.outputs.VERSION }}';
+            const owner = '${{ github.repository_owner }}';
+            const commits = `${{ steps.changelog.outputs.COMMITS }}`;
+            const rawUrl = `https://raw.githubusercontent.com/${{ github.repository }}/main`;
+
+            const body = [
+              '## ExamForge ' + version,
+              '',
+              '### Changes',
+              commits,
+              '',
+              '---',
+              '',
+              '### Deploy (no git clone needed)',
+              '',
+              '**1. Download the environment template**',
+              '```bash',
+              'curl -O ' + rawUrl + '/.env.example',
+              'cp .env.example .env',
+              '```',
+              '',
+              '**2. Edit `.env`** — set `JWT_SECRET` (required) and `GHCR_OWNER` to `' + owner + '`',
+              '',
+              '**3. Create a `docker-compose.yml`** with the following and run `docker compose up -d`:',
+              '',
+              '```yaml',
+              'services:',
+              '  backend:',
+              '    image: ghcr.io/' + owner + '/examforge-backend:' + version,
+              '    container_name: examforge-backend',
+              '    restart: unless-stopped',
+              '    environment:',
+              '      NODE_ENV: production',
+              '      PORT: 3001',
+              '      DB_PATH: /data/exam.db',
+              '      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}',
+              '      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}',
+              '    volumes:',
+              '      - db_data:/data',
+              '    networks:',
+              '      - examforge',
+              '    healthcheck:',
+              '      test: ["CMD", "node", "-e", "require(\'http\').get(\'http://localhost:3001/api/health\', r => process.exit(r.statusCode === 200 ? 0 : 1))"]',
+              '      interval: 30s',
+              '      timeout: 10s',
+              '      retries: 3',
+              '',
+              '  frontend:',
+              '    image: ghcr.io/' + owner + '/examforge-frontend:' + version,
+              '    container_name: examforge-frontend',
+              '    restart: unless-stopped',
+              '    ports:',
+              '      - "${PORT:-3000}:80"',
+              '    depends_on:',
+              '      backend:',
+              '        condition: service_healthy',
+              '    networks:',
+              '      - examforge',
+              '',
+              'volumes:',
+              '  db_data:',
+              '    name: examforge_db_data',
+              '',
+              'networks:',
+              '  examforge:',
+              '    driver: bridge',
+              '```',
+              '',
+              '---',
+              '',
+              '### Update an existing install',
+              '```bash',
+              '# Pull latest images and restart:',
+              'docker compose pull && docker compose up -d',
+              '```',
+              '',
+              '---',
+              '',
+              '### Images',
+              '- Backend: `ghcr.io/' + owner + '/examforge-backend:' + version + '`',
+              '- Frontend: `ghcr.io/' + owner + '/examforge-frontend:' + version + '`',
+              '',
+              '### Full setup guide',
+              'See the [README](https://github.com/${{ github.repository }}#readme) for development setup, adding new exams, and all configuration options.',
+            ].join('\n');
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: 'ExamForge ' + version,
+              body: body,
+              draft: false,
+              prerelease: version.includes('-'),
+            });
+
+            console.log('Release created: ExamForge ' + version);

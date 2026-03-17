@@ -1,0 +1,7 @@
+import client from './client.js';
+
+export const authApi = {
+  register: (data) => client.post('/api/auth/register', data),
+  login: (data) => client.post('/api/auth/login', data),
+  me: () => client.get('/api/auth/me'),
+};
