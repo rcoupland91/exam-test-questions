@@ -23,16 +23,16 @@ services:
       - examforge
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   frontend:
     image: ${EXAMFORGE_FRONTEND_IMAGE:-ghcr.io/rcoupland91/examforge-frontend:latest}
     container_name: examforge-frontend
     restart: unless-stopped
     ports:
-      - "${PORT:-5000}:80"
+      - "${PORT:-5173}:80"
     depends_on:
       backend:
         condition: service_healthy

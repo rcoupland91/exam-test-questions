@@ -199,15 +199,15 @@
     {
       "external_id": "tf004-q-013",
       "objective_code": "3",
-      "body": "Given the following Terraform configuration, what will happen when `terraform init` is run?\n\n```hcl\nterraform {\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"~> 5.0\"\n    }\n  }\n}\n\nprovider \"aws\" {\n  region = \"us-east-1\"\n}\n```",
+      "body": "Given the following Terraform configuration, what will happen when `terraform init` is run?\n\n```hcl\nterraform {\n  required_providers {\n    azurerm = {\n      source  = \"hashicorp/azurerm\"\n      version = \"~> 3.0\"\n    }\n  }\n}\n\nprovider \"azurerm\" {\n  features {}\n}\n```",
       "choices": [
-        { "key": "A", "text": "Terraform will create all AWS resources defined in the configuration" },
-        { "key": "B", "text": "Terraform will download and install the AWS provider plugin version ~> 5.0 from the Terraform Registry" },
-        { "key": "C", "text": "Terraform will validate the AWS credentials" },
+        { "key": "A", "text": "Terraform will create all Azure resources defined in the configuration" },
+        { "key": "B", "text": "Terraform will download and install the AzureRM provider plugin version ~> 3.0 from the Terraform Registry" },
+        { "key": "C", "text": "Terraform will validate the Azure credentials" },
         { "key": "D", "text": "Terraform will create a plan showing what resources will be created" }
       ],
       "correct_key": "B",
-      "explanation": "'terraform init' is the initialization command that prepares a working directory. Its primary job is to download and install the provider plugins specified in the 'required_providers' block. In this case, it would download the hashicorp/aws provider, constrained to version ~> 5.0 (any 5.x version). Option A is wrong — 'terraform apply' creates resources. Option C is partially true in that it validates the configuration but does not check actual AWS credentials. Option D describes 'terraform plan'.",
+      "explanation": "'terraform init' is the initialization command that prepares a working directory. Its primary job is to download and install the provider plugins specified in the 'required_providers' block. In this case, it would download the hashicorp/azurerm provider, constrained to version ~> 3.0 (any 3.x version). Option A is wrong — 'terraform apply' creates resources. Option C is partially true in that it validates the configuration but does not check actual Azure credentials. Option D describes 'terraform plan'.",
       "difficulty": "easy",
       "tags": ["terraform-init", "providers", "workflow"]
     },
@@ -229,15 +229,15 @@
     {
       "external_id": "tf004-q-015",
       "objective_code": "3",
-      "body": "What is the difference between a `resource` block and a `data` block in Terraform?",
+      "body": "What is the difference between a `resource` block and a `data` block in Terraform? Consider the following example:\n\n```hcl\ndata \"azurerm_resource_group\" \"existing\" {\n  name = \"my-existing-rg\"\n}\n\nresource \"azurerm_linux_virtual_machine\" \"web\" {\n  name                = \"web-vm\"\n  resource_group_name = data.azurerm_resource_group.existing.name\n  location            = data.azurerm_resource_group.existing.location\n}\n```",
       "choices": [
-        { "key": "A", "text": "Resource blocks are for AWS only; data blocks work with all providers" },
+        { "key": "A", "text": "Resource blocks are for Azure only; data blocks work with all providers" },
         { "key": "B", "text": "Resource blocks define infrastructure to be created/managed by Terraform; data blocks query existing infrastructure or external data sources without managing their lifecycle" },
         { "key": "C", "text": "Data blocks are deprecated and should be replaced with resource blocks" },
         { "key": "D", "text": "Resource blocks and data blocks are identical; the names are interchangeable" }
       ],
       "correct_key": "B",
-      "explanation": "Resource blocks declare infrastructure objects that Terraform will create and manage throughout their lifecycle (create, update, delete). Data source blocks allow Terraform to read information from existing infrastructure or external sources without taking ownership of those resources — Terraform will never destroy a data source. For example, you might use a data block to look up an existing VPC ID to use in a new resource. Options A, C, and D are all incorrect — resources and data sources are distinct concepts used across all providers.",
+      "explanation": "Resource blocks declare infrastructure objects that Terraform will create and manage throughout their lifecycle (create, update, delete). Data source blocks allow Terraform to read information from existing infrastructure or external sources without taking ownership of those resources — Terraform will never destroy a data source. In the example, the data block looks up an existing Azure resource group and the resource block creates a new Linux VM in it. Options A, C, and D are all incorrect — resources and data sources are distinct concepts used across all providers.",
       "difficulty": "medium",
       "tags": ["resources", "data-sources", "fundamentals"]
     },
@@ -274,30 +274,30 @@
     {
       "external_id": "tf004-q-018",
       "objective_code": "3",
-      "body": "What is the correct syntax to reference the `id` attribute of an `aws_vpc` resource named `main` in Terraform?",
+      "body": "What is the correct syntax to reference the `id` attribute of an `azurerm_virtual_network` resource named `main` in Terraform?",
       "choices": [
-        { "key": "A", "text": "${aws_vpc.id.main}" },
-        { "key": "B", "text": "var.aws_vpc_main_id" },
-        { "key": "C", "text": "aws_vpc.main.id" },
-        { "key": "D", "text": "resource.aws_vpc.main.id" }
+        { "key": "A", "text": "${azurerm_virtual_network.id.main}" },
+        { "key": "B", "text": "var.azurerm_virtual_network_main_id" },
+        { "key": "C", "text": "azurerm_virtual_network.main.id" },
+        { "key": "D", "text": "resource.azurerm_virtual_network.main.id" }
       ],
       "correct_key": "C",
-      "explanation": "The correct syntax to reference a resource attribute in Terraform is: <resource_type>.<resource_name>.<attribute>. So to reference the 'id' of an 'aws_vpc' resource named 'main', you use 'aws_vpc.main.id'. This is called a resource reference or a resource attribute expression. Option A uses incorrect bracket syntax and wrong order. Option B is variable syntax. Option D incorrectly includes 'resource.' prefix — that prefix is not used in attribute references.",
+      "explanation": "The correct syntax to reference a resource attribute in Terraform is: <resource_type>.<resource_name>.<attribute>. So to reference the 'id' of an 'azurerm_virtual_network' resource named 'main', you use 'azurerm_virtual_network.main.id'. This is called a resource reference or a resource attribute expression. Option A uses incorrect bracket syntax and wrong order. Option B is variable syntax. Option D incorrectly includes 'resource.' prefix — that prefix is not used in attribute references.",
       "difficulty": "easy",
       "tags": ["references", "syntax", "fundamentals"]
     },
     {
       "external_id": "tf004-q-019",
       "objective_code": "3",
-      "body": "What type of dependency does the following configuration create, and how does Terraform handle it?\n\n```hcl\nresource \"aws_subnet\" \"public\" {\n  vpc_id = aws_vpc.main.id\n  cidr_block = \"10.0.1.0/24\"\n}\n```",
+      "body": "What type of dependency does the following configuration create, and how does Terraform handle it?\n\n```hcl\nresource \"azurerm_subnet\" \"public\" {\n  name                 = \"public-subnet\"\n  resource_group_name  = azurerm_resource_group.main.name\n  virtual_network_name = azurerm_virtual_network.main.name\n  address_prefixes     = [\"10.0.1.0/24\"]\n}\n```",
       "choices": [
         { "key": "A", "text": "An explicit dependency using the depends_on meta-argument; Terraform requires depends_on for all resource relationships" },
-        { "key": "B", "text": "An implicit dependency through the reference aws_vpc.main.id; Terraform automatically detects this and ensures the VPC is created before the subnet" },
+        { "key": "B", "text": "An implicit dependency through the references to azurerm_resource_group.main and azurerm_virtual_network.main; Terraform automatically detects these and ensures those resources are created before the subnet" },
         { "key": "C", "text": "A circular dependency that will cause terraform apply to fail" },
         { "key": "D", "text": "No dependency is created; Terraform creates resources in alphabetical order" }
       ],
       "correct_key": "B",
-      "explanation": "When you reference one resource's attribute in another resource's argument (vpc_id = aws_vpc.main.id), Terraform automatically detects an implicit dependency. The dependency graph ensures aws_vpc.main is created first, and then aws_subnet.public is created using the VPC's actual ID. This is the preferred way to express dependencies in Terraform. Option A describes 'depends_on', which is for explicit dependencies when the relationship isn't expressed through references. Option C is wrong — this is a valid directional dependency. Option D is wrong — Terraform uses the dependency graph, not alphabetical order.",
+      "explanation": "When you reference one resource's attribute in another resource's argument (e.g., virtual_network_name = azurerm_virtual_network.main.name), Terraform automatically detects an implicit dependency. The dependency graph ensures azurerm_resource_group.main and azurerm_virtual_network.main are created first, and then azurerm_subnet.public is created using their actual values. This is the preferred way to express dependencies in Terraform. Option A describes 'depends_on', which is for explicit dependencies when the relationship isn't expressed through references. Option C is wrong — these are valid directional dependencies. Option D is wrong — Terraform uses the dependency graph, not alphabetical order.",
       "difficulty": "medium",
       "tags": ["dependencies", "implicit", "dependency-graph"]
     },
@@ -319,15 +319,15 @@
     {
       "external_id": "tf004-q-021",
       "objective_code": "3",
-      "body": "What will the `count` meta-argument do in the following resource block?\n\n```hcl\nresource \"aws_instance\" \"web\" {\n  count         = 3\n  ami           = \"ami-0abcdef1234567890\"\n  instance_type = \"t3.micro\"\n  tags = {\n    Name = \"web-${count.index}\"\n  }\n}\n```",
+      "body": "What will the `count` meta-argument do in the following resource block?\n\n```hcl\nresource \"azurerm_linux_virtual_machine\" \"web\" {\n  count               = 3\n  name                = \"web-${count.index}\"\n  resource_group_name = azurerm_resource_group.main.name\n  location            = azurerm_resource_group.main.location\n  size                = \"Standard_B1s\"\n  tags = {\n    Name = \"web-${count.index}\"\n  }\n}\n```",
       "choices": [
-        { "key": "A", "text": "Create one EC2 instance and name it 'web-3'" },
-        { "key": "B", "text": "Create 3 identical EC2 instances named web-0, web-1, and web-2" },
-        { "key": "C", "text": "Create 3 EC2 instances but only the first one will have a Name tag" },
+        { "key": "A", "text": "Create one virtual machine and name it 'web-3'" },
+        { "key": "B", "text": "Create 3 identical Linux virtual machines named web-0, web-1, and web-2" },
+        { "key": "C", "text": "Create 3 virtual machines but only the first one will have a Name tag" },
         { "key": "D", "text": "Cause a Terraform error because count.index is not a valid expression" }
       ],
       "correct_key": "B",
-      "explanation": "The 'count' meta-argument creates multiple instances of a resource. With count = 3, Terraform creates 3 aws_instance resources. Within the resource block, 'count.index' refers to the current instance's index (0, 1, or 2). The tags expression '\"web-${count.index}\"' will produce 'web-0', 'web-1', and 'web-2' respectively. The resources are referenced as aws_instance.web[0], aws_instance.web[1], aws_instance.web[2]. Option A is wrong about the count. Option C is wrong — all instances get Name tags. Option D is wrong — count.index is valid.",
+      "explanation": "The 'count' meta-argument creates multiple instances of a resource. With count = 3, Terraform creates 3 azurerm_linux_virtual_machine resources. Within the resource block, 'count.index' refers to the current instance's index (0, 1, or 2). The name expression '\"web-${count.index}\"' will produce 'web-0', 'web-1', and 'web-2' respectively. The resources are referenced as azurerm_linux_virtual_machine.web[0], azurerm_linux_virtual_machine.web[1], azurerm_linux_virtual_machine.web[2]. Option A is wrong about the count. Option C is wrong — all instances get Name tags. Option D is wrong — count.index is valid.",
       "difficulty": "medium",
       "tags": ["count", "meta-arguments", "looping"]
     },
@@ -364,12 +364,12 @@
     {
       "external_id": "tf004-q-024",
       "objective_code": "3",
-      "body": "Which of the following is a valid Terraform output value definition?",
+      "body": "Which of the following is a valid Terraform output value definition for an Azure virtual network?",
       "choices": [
-        { "key": "A", "text": "output \"vpc_id\" { value = aws_vpc.main.id }" },
-        { "key": "B", "text": "export \"vpc_id\" = aws_vpc.main.id" },
-        { "key": "C", "text": "return aws_vpc.main.id as vpc_id" },
-        { "key": "D", "text": "output = { vpc_id = aws_vpc.main.id }" }
+        { "key": "A", "text": "output \"vnet_id\" { value = azurerm_virtual_network.main.id }" },
+        { "key": "B", "text": "export \"vnet_id\" = azurerm_virtual_network.main.id" },
+        { "key": "C", "text": "return azurerm_virtual_network.main.id as vnet_id" },
+        { "key": "D", "text": "output = { vnet_id = azurerm_virtual_network.main.id }" }
       ],
       "correct_key": "A",
       "explanation": "The correct Terraform syntax for an output value is: output \"<name>\" { value = <expression> }. The output block takes a label (the name) and requires the 'value' argument. Optional arguments include 'description', 'sensitive', and 'depends_on'. Option B, C, and D all use invalid syntax that is not valid HCL or Terraform.",
@@ -754,15 +754,15 @@
     {
       "external_id": "tf004-q-050",
       "objective_code": "7",
-      "body": "What is state locking in Terraform and which backend provides it?",
+      "body": "What is state locking in Terraform and how does the Azure (`azurerm`) backend handle it?",
       "choices": [
-        { "key": "A", "text": "State locking encrypts the state file at rest; AWS S3 provides this by default" },
-        { "key": "B", "text": "State locking prevents concurrent state modifications by multiple users or processes. AWS S3 backend requires a DynamoDB table for locking; Terraform Cloud provides locking automatically" },
+        { "key": "A", "text": "State locking encrypts the state file at rest; the azurerm backend provides this by default" },
+        { "key": "B", "text": "State locking prevents concurrent state modifications by multiple users or processes. The azurerm backend uses Azure Blob Storage lease-based locking automatically; Terraform Cloud also provides locking automatically" },
         { "key": "C", "text": "State locking is a feature only available in Terraform Enterprise" },
         { "key": "D", "text": "State locking prevents anyone from reading the state file" }
       ],
       "correct_key": "B",
-      "explanation": "State locking prevents two Terraform operations from running simultaneously and corrupting the state. When an operation starts, Terraform acquires a lock on the state; other operations must wait. For the S3 backend, locking requires a separate DynamoDB table. Terraform Cloud and Terraform Enterprise have built-in locking. The local backend also implements locking using a .terraform.tfstate.lock.info file. Not all backends support locking — you should always choose one that does for team use. Options A, C, and D are incorrect.",
+      "explanation": "State locking prevents two Terraform operations from running simultaneously and corrupting the state. When an operation starts, Terraform acquires a lock on the state; other operations must wait. The azurerm backend uses Azure Blob Storage's native lease mechanism to implement locking automatically — no additional resource (like a DynamoDB table) is needed. Terraform Cloud and Terraform Enterprise also have built-in locking. The local backend implements locking using a .terraform.tfstate.lock.info file. Not all backends support locking — you should always choose one that does for team use. Options A, C, and D are incorrect.",
       "difficulty": "medium",
       "tags": ["state-locking", "remote-backend", "concurrency"]
     },
@@ -852,22 +852,22 @@
         { "key": "D", "text": "The moved block creates a copy of the resource at the new address and deletes the original" }
       ],
       "correct_key": "B",
-      "explanation": "The 'moved' block (introduced in Terraform 1.1) lets you document a resource rename or module restructure directly in your configuration code. When team members run 'terraform apply', Terraform automatically updates state to reflect the new address — no manual 'terraform state mv' command needed. This is superior for team workflows because the move instruction is version-controlled and applied consistently. Example: moved { from = aws_instance.old_name  to = aws_instance.new_name }. Option A is wrong — moved doesn't move cloud resources. Option C is wrong — it's available in open-source Terraform 1.1+. Option D is wrong — it's a state rename, not a copy.",
+      "explanation": "The 'moved' block (introduced in Terraform 1.1) lets you document a resource rename or module restructure directly in your configuration code. When team members run 'terraform apply', Terraform automatically updates state to reflect the new address — no manual 'terraform state mv' command needed. This is superior for team workflows because the move instruction is version-controlled and applied consistently. Example: moved { from = azurerm_linux_virtual_machine.old_name  to = azurerm_linux_virtual_machine.new_name }. Option A is wrong — moved doesn't move cloud resources. Option C is wrong — it's available in open-source Terraform 1.1+. Option D is wrong — it's a state rename, not a copy.",
       "difficulty": "hard",
       "tags": ["moved-block", "refactoring", "state-management"]
     },
     {
       "external_id": "tf004-q-065",
       "objective_code": "4",
-      "body": "Which command would you use to show the current attributes of a specific resource in Terraform state?",
+      "body": "Which command would you use to show the current attributes of a specific Azure Linux virtual machine resource in Terraform state?",
       "choices": [
-        { "key": "A", "text": "terraform state show aws_instance.web" },
-        { "key": "B", "text": "terraform show aws_instance.web" },
-        { "key": "C", "text": "terraform inspect aws_instance.web" },
-        { "key": "D", "text": "terraform state describe aws_instance.web" }
+        { "key": "A", "text": "terraform state show azurerm_linux_virtual_machine.web" },
+        { "key": "B", "text": "terraform show azurerm_linux_virtual_machine.web" },
+        { "key": "C", "text": "terraform inspect azurerm_linux_virtual_machine.web" },
+        { "key": "D", "text": "terraform state describe azurerm_linux_virtual_machine.web" }
       ],
       "correct_key": "A",
-      "explanation": "'terraform state show <resource_address>' displays the current attributes of a specific resource as stored in the Terraform state file. This includes all known attributes like the resource ID, IP addresses, tags, and other provider-specific attributes. This is useful for inspecting what Terraform knows about a resource without needing to open the state file directly. Option B ('terraform show') without 'state' shows the entire state or a saved plan file. Option C and D are not valid Terraform commands.",
+      "explanation": "'terraform state show <resource_address>' displays the current attributes of a specific resource as stored in the Terraform state file. This includes all known attributes like the resource ID, private IP addresses, tags, and other provider-specific attributes. This is useful for inspecting what Terraform knows about a resource without needing to open the state file directly. Option B ('terraform show') without 'state' shows the entire state or a saved plan file. Option C and D are not valid Terraform commands.",
       "difficulty": "easy",
       "tags": ["state-show", "state-management", "commands"]
     },
@@ -919,15 +919,15 @@
     {
       "external_id": "tf004-q-059",
       "objective_code": "8",
-      "body": "What does the following Terraform configuration do?\n\n```hcl\ndynamic \"ingress\" {\n  for_each = var.ingress_rules\n  content {\n    from_port   = ingress.value.from_port\n    to_port     = ingress.value.to_port\n    protocol    = ingress.value.protocol\n    cidr_blocks = ingress.value.cidr_blocks\n  }\n}\n```",
+      "body": "What does the following Terraform configuration do?\n\n```hcl\nresource \"azurerm_network_security_group\" \"web\" {\n  name                = \"web-nsg\"\n  location            = azurerm_resource_group.main.location\n  resource_group_name = azurerm_resource_group.main.name\n\n  dynamic \"security_rule\" {\n    for_each = var.security_rules\n    content {\n      name                       = security_rule.value.name\n      priority                   = security_rule.value.priority\n      direction                  = security_rule.value.direction\n      access                     = security_rule.value.access\n      protocol                   = security_rule.value.protocol\n      destination_port_range     = security_rule.value.destination_port_range\n      source_address_prefix      = security_rule.value.source_address_prefix\n      destination_address_prefix = security_rule.value.destination_address_prefix\n    }\n  }\n}\n```",
       "choices": [
-        { "key": "A", "text": "Creates multiple security group resources, one per ingress rule" },
-        { "key": "B", "text": "Dynamically generates multiple nested 'ingress' blocks within a resource based on the values in var.ingress_rules" },
+        { "key": "A", "text": "Creates multiple network security group resources, one per security rule" },
+        { "key": "B", "text": "Dynamically generates multiple nested 'security_rule' blocks within the azurerm_network_security_group resource based on the values in var.security_rules" },
         { "key": "C", "text": "Creates a for loop that iterates but does nothing with the values" },
         { "key": "D", "text": "This syntax is invalid; Terraform does not support dynamic blocks" }
       ],
       "correct_key": "B",
-      "explanation": "Dynamic blocks allow you to generate repeated nested blocks (like 'ingress' rules in an aws_security_group, 'tag' blocks in a resource) based on a collection variable. The 'for_each' expression iterates over 'var.ingress_rules', and for each element, generates one 'ingress' block with the specified content. Inside the content block, 'ingress.value' refers to the current iteration's value (or 'ingress.key' for the key). This avoids hardcoding a fixed number of nested blocks. Option A is wrong — it's creating blocks within ONE resource. Options C and D are incorrect.",
+      "explanation": "Dynamic blocks allow you to generate repeated nested blocks (like 'security_rule' blocks in an azurerm_network_security_group) based on a collection variable. The 'for_each' expression iterates over 'var.security_rules', and for each element, generates one 'security_rule' block with the specified content. Inside the content block, 'security_rule.value' refers to the current iteration's value (or 'security_rule.key' for the key). This avoids hardcoding a fixed number of nested blocks. Option A is wrong — it's creating blocks within ONE resource. Options C and D are incorrect.",
       "difficulty": "hard",
       "tags": ["dynamic-blocks", "expressions", "meta-arguments"]
     },

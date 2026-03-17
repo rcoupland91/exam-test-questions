@@ -12,7 +12,7 @@ No git clone required — images are pulled from GitHub Container Registry.
 
 **1. Download the environment template**
 ```bash
-curl -O https://raw.githubusercontent.com/YOUR_USERNAME/exam-test-questions/main/.env.example
+curl -O https://raw.githubusercontent.com/rcoupland91/exam-test-questions/main/.env.example
 cp .env.example .env
 ```
 
@@ -23,11 +23,11 @@ JWT_SECRET=your_super_secret_key_at_least_32_chars
 
 **3. Download the compose file and start**
 ```bash
-curl -O https://raw.githubusercontent.com/YOUR_USERNAME/exam-test-questions/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/rcoupland91/exam-test-questions/main/docker-compose.yml
 docker compose up -d
 ```
 
-Access the app at **http://localhost:5000**
+Access the app at **http://localhost:5173**
 
 **Update to latest version:**
 ```bash
