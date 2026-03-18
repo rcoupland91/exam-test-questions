@@ -137,7 +137,8 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-8 w-full">
           {/* Header */}
           <div className="text-center mb-8">
-            <img src="/logo.svg" className="w-12 h-auto mx-auto mb-4" alt="ExamForge" />
+            <img src="/logo.svg" className="w-12 h-auto mx-auto mb-2" alt="ExamForge" />
+            <p className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mb-4">ExamForge</p>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to continue studying</p>
           </div>
